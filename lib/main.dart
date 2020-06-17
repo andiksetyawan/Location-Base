@@ -39,10 +39,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
       var _status = await Permission.location.status;
+      if (await Permission.location.request().isGranted) {
+        _status = await Permission.location.status;
+      }
       setState(() {
         _locationPermission = _status;
       });
-      if (await Permission.location.request().isGranted) {}
     }
   }
 
@@ -58,17 +60,28 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
       if (data.index != 2) {
         //show local notification ongoing
-        _showLocalNotificationOngoing(title: "Oh tidak!", body: "Aktifkan GPS Anda agar aplikasi dapat berfungsi secara normal", payload: "");
-      }else{
+        _showLocalNotificationOngoing(
+            title: "Oh tidak!",
+            body:
+                "Aktifkan GPS Anda agar aplikasi dapat berfungsi secara normal",
+            payload: "");
+      } else {
         //destroy local notification ongoing id -1
         flutterLocalNotificationsPlugin.cancel(-1);
 
         //show other notification
-        _showLocalNotification(title: "Mantaap", body: "GPS sekarang sudah aktif", payload: "");
-
+        _showLocalNotification(
+            title: "Mantaap", body: "GPS sekarang sudah aktif", payload: "");
       }
     });
-    if (await Permission.location.request().isGranted) {}
+
+    var _status = await Permission.location.status;
+    if (await Permission.location.request().isGranted) {
+      _status = await Permission.location.status;
+    }
+    setState(() {
+      _locationPermission = _status;
+    });
   }
 
   //localnotification
@@ -101,7 +114,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
     await flutterLocalNotificationsPlugin
         .show(0, title, body, platformChannelSpecifics, payload: payload);
-        
   }
 
   _showLocalNotificationOngoing(
