@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-// import 'package:background_locator/background_locator.dart';
+import 'dart:isolate';
+import 'dart:ui';
+import 'package:background_locator/background_locator.dart';
+import 'package:background_locator/location_dto.dart';
+import 'package:background_locator/location_settings.dart';
 
 import 'package:location_permissions/location_permissions.dart'
     as locationPermission;
@@ -36,6 +40,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  static const String _isolateName = "LocatorIsolate";
+  ReceivePort port = ReceivePort();
+
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
       var _status = await Permission.location.status;
@@ -70,8 +77,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         flutterLocalNotificationsPlugin.cancel(-1);
 
         //show other notification
-        _showLocalNotification(
-            title: "Mantaap", body: "GPS sekarang sudah aktif", payload: "");
+        // _showLocalNotification(
+        //     title: "Mantaap", body: "GPS sekarang sudah aktif", payload: "");
       }
     });
 
@@ -138,13 +145,56 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         .show(-1, title, body, platformChannelSpecifics, payload: payload);
   }
 
+  Future<void> initPlatformState() async {
+    await BackgroundLocator.initialize();
+  }
+
+  static void callback(LocationDto locationDto) async {
+    final SendPort send = IsolateNameServer.lookupPortByName(_isolateName);
+    send?.send(locationDto);
+  }
+
+//Optional
+  static void notificationCallback() {
+    print('User clicked on the notification');
+  }
+
+  void startLocationService(){
+    BackgroundLocator.registerLocationUpdate(
+        callback,
+        //optional
+        androidNotificationCallback: notificationCallback,
+        settings: LocationSettings(
+            //Scroll down to see the different options
+            notificationChannelName: "dev.andiksetyawan.location_base",
+            notificationTitle: "Location Base",
+            notificationMsg: "Location service activated",
+            wakeLockTime: 20,
+            autoStop: false,
+            interval: 1
+        ),
+    );
+}
+  
   @override
   void initState() {
     // TODO: implement initState
     WidgetsBinding.instance.addObserver(this);
+    
     _init();
     _initLocalNotif();
     super.initState();
+
+    IsolateNameServer.registerPortWithName(port.sendPort, _isolateName);
+    port.listen((dynamic data) {
+     
+      print("get location data");
+      print(data);
+       // do something with data
+       // or send data
+    });
+    initPlatformState();
+    startLocationService();
   }
 
   @override
