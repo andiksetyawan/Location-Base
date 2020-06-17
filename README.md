@@ -1,10 +1,10 @@
 # Flutter Location Base
 
-[✓] State GPS Service
-[✓] Permission location & binding state changed
-[✓] On-going notification (cannot close notif) if GPS Service not Active
-[x] Location 
-[x] Background Location
+[✓] State GPS Service\
+[✓] Permission location & binding state changed\
+[✓] On-going notification (cannot close notif) if GPS Service not Active\
+[x] Location\
+[x] Background Location\
 
 A new Flutter project.
 
