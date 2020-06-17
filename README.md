@@ -3,8 +3,11 @@
 [✓] State GPS Service\
 [✓] Permission location & binding state changed\
 [✓] On-going notification (cannot close notif) if GPS Service not Active\
-[x] Location\
-[x] Background Location\
+[✓] Location\
+[✓] Background Location\
+\
+[x] change notif of background location (if gps state not active)
+
 
 A new Flutter project.
 
